@@ -42,6 +42,12 @@ Print the JSON report for unique findings:
 gitleaks-dedup gitleaks-report.json --unique --output json
 ```
 
+Only consider findings as duplicate if they appear in the same file
+
+```sh
+gitleaks-dedup gitleaks-report.json --same-file
+```
+
 ## License
 
 If not stated otherwise, the source code inside this repository is licensed

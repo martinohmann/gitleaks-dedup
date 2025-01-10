@@ -10,6 +10,10 @@ struct Args {
     /// Print unique findings rather than duplicates.
     #[arg(short = 'u', long)]
     unique: bool,
+    /// Only consider findings as duplicates if they appear in the same file across multiple
+    /// commits.
+    #[arg(long)]
+    same_file: bool,
     /// Output format for the findings.
     #[arg(short = 'o', long, value_enum, default_value_t = OutputFormat::Text)]
     output: OutputFormat,
@@ -49,8 +53,10 @@ struct Finding {
 }
 
 impl Finding {
-    fn is_duplicate_of(&self, other: &Finding) -> bool {
-        self.secret == other.secret && self.rule_id == other.rule_id
+    fn is_duplicate_of(&self, other: &Finding, args: &Args) -> bool {
+        self.secret == other.secret
+            && self.rule_id == other.rule_id
+            && (!args.same_file || self.file == other.file)
     }
 }
 
@@ -59,12 +65,15 @@ struct PartitionResult<T> {
     duplicated: Vec<T>,
 }
 
-fn partition_findings(findings: Vec<Finding>) -> PartitionResult<Finding> {
+fn partition_findings(findings: Vec<Finding>, args: &Args) -> PartitionResult<Finding> {
     let mut unique = Vec::new();
     let mut duplicated = Vec::new();
 
     for finding in findings {
-        if unique.iter().any(|other| finding.is_duplicate_of(other)) {
+        if unique
+            .iter()
+            .any(|other| finding.is_duplicate_of(other, args))
+        {
             duplicated.push(finding);
         } else {
             unique.push(finding);
@@ -93,7 +102,7 @@ fn main() -> Result<()> {
 
     info!("gitleaks report contains {} findings", report.len());
 
-    let PartitionResult { unique, duplicated } = partition_findings(report);
+    let PartitionResult { unique, duplicated } = partition_findings(report, &args);
 
     info!(
         "{} unique findings, {} duplicates",
