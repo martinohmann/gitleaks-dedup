@@ -10,7 +10,7 @@ helps to surface unique and duplicate findings.
 
 ## Installation
 
-As of now, there are no published releases, please install directory from git:
+As of now, there are no published releases, please install from git directly:
 
 ```sh
 cargo install --git https://github.com/martinohmann/gitleaks-dedup.git
