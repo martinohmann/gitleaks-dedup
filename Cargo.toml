@@ -1,7 +1,13 @@
 [package]
 name = "gitleaks-dedup"
 version = "0.1.0"
+authors = ["Martin Ohmann <martinohmann@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "Deduplicate gitleaks findings"
+repository = "https://github.com/martinohmann/gitleaks-dedup"
+readme = "README.md"
 edition = "2021"
+publish = false
 
 [dependencies]
 anyhow = "1.0.95"
