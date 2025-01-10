@@ -19,7 +19,7 @@ struct Args {
 
 #[derive(ValueEnum, Debug, Clone, Copy)]
 enum OutputFormat {
-    JSON,
+    Json,
     Text,
 }
 
@@ -104,7 +104,7 @@ fn main() -> Result<()> {
     let mut findings = if args.unique { unique } else { duplicated };
 
     match args.output {
-        OutputFormat::JSON => {
+        OutputFormat::Json => {
             serde_json::to_writer_pretty(std::io::stdout(), &findings)?;
         }
         OutputFormat::Text => {
