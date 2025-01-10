@@ -1,6 +1,6 @@
 use anyhow::Result;
-use clap::Parser;
-use serde::Deserialize;
+use clap::{Parser, ValueEnum};
+use serde::{Deserialize, Serialize};
 use std::{fs::File, path::Path, path::PathBuf};
 use tracing::info;
 
@@ -10,14 +10,39 @@ struct Args {
     /// Print unique findings rather than duplicates.
     #[arg(short = 'u', long)]
     unique: bool,
+    /// Output format for the findings.
+    #[arg(short = 'o', long, value_enum, default_value_t = OutputFormat::Text)]
+    output: OutputFormat,
     /// The path the the gitleaks JSON report.
     report_path: PathBuf,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(ValueEnum, Debug, Clone, Copy)]
+enum OutputFormat {
+    JSON,
+    Text,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 struct Finding {
+    description: String,
+    start_line: usize,
+    end_line: usize,
+    start_column: usize,
+    end_column: usize,
+    #[serde(rename = "Match")]
+    match_: String,
     secret: String,
+    file: String,
+    symlink_file: String,
+    commit: String,
+    entropy: f32,
+    author: String,
+    email: String,
+    date: String,
+    message: String,
+    tags: Vec<String>,
     #[serde(rename = "RuleID")]
     rule_id: String,
     fingerprint: String,
@@ -78,10 +103,17 @@ fn main() -> Result<()> {
 
     let mut findings = if args.unique { unique } else { duplicated };
 
-    findings.sort_by(|a, b| a.fingerprint.cmp(&b.fingerprint));
+    match args.output {
+        OutputFormat::JSON => {
+            serde_json::to_writer_pretty(std::io::stdout(), &findings)?;
+        }
+        OutputFormat::Text => {
+            findings.sort_by(|a, b| a.fingerprint.cmp(&b.fingerprint));
 
-    for finding in findings {
-        println!("{}", finding.fingerprint);
+            for finding in findings {
+                println!("{}", finding.fingerprint);
+            }
+        }
     }
 
     Ok(())

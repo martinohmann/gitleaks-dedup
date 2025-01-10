@@ -36,6 +36,12 @@ Show the fingerprints of the unique findings:
 gitleaks-dedup gitleaks-report.json --unique
 ```
 
+Print the JSON report for unique findings:
+
+```sh
+gitleaks-dedup gitleaks-report.json --unique --output json
+```
+
 ## License
 
 If not stated otherwise, the source code inside this repository is licensed
